@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
         coefs[var] = sinc * sin(2 * PI * fs / 4. * (double)var / fs);
     }
     m_coefsls->replace(make_points(coefs));
-    auto coefsfr = ft::dft_m(coefs);
+    auto coefsfr = ft::dft_m(ft::dft(coefs));
     m_coefsfrls->replace(make_points(coefsfr));
     QVector<double> signal;
     signal.resize(N);

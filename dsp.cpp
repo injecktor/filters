@@ -13,14 +13,13 @@ vectorc_t ft::dft(vector_t a_input)
     return result;
 }
 
-vector_t ft::dft_m(vector_t a_input)
+vector_t ft::dft_m(vectorc_t a_input)
 {
     size_t N = a_input.size();
-    auto dftc = dft(a_input);
     vector_t result;
     result.resize(N);
     for (size_t var = 0; var < N; ++var) {
-        result[var] = abs(dftc[var]);
+        result[var] = abs(a_input[var]);
     }
     return result;
 }
