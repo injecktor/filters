@@ -29,17 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
     auto coefsfr = ft::dft_m(ft::dft(coefs));
     m_coefsfrls->replace(make_points(coefsfr));
     QVector<double> signal;
-    QVector<double> signal2;
     signal.resize(N);
-    signal2.resize(N);
     for (int var = 0; var < N; ++var) {
         signal[var] = sin(2 * PI * 1000 * (double)var / fs);
-        signal2[var] = 2 * sin(2 * PI * 500 * (double)var / fs);;
     }
     m_inputls->replace(make_points(signal));
     // m_testls->replace(make_points(signal2));
     auto filtered_signal = ft::convolution(signal, coefs);
-    m_outputls->replace(make_points(filtered_signal));
+    // m_outputls->replace(make_points(filtered_signal));
+    draw_complex(ft::dft(signal), m_outputcv);
 }
 
 MainWindow::~MainWindow()
@@ -56,6 +54,7 @@ void MainWindow::showEvent(QShowEvent* /*event*/) {
 
 void MainWindow::charts_config()
 {
+    // Real serias must be added before complex ones
     m_inputcv->chart()->addSeries(m_inputls);
     m_inputcv->chart()->addSeries(m_inputcls);
     m_outputcv->chart()->addSeries(m_outputls);
@@ -86,6 +85,26 @@ QVector<QPointF> MainWindow::make_points(QVector<double> a_values)
         points.append({static_cast<double>(var), a_values[var]});
     }
     return points;
+}
+
+quint8 MainWindow::draw_complex(QVector<std::complex<double>> a_values, QChartView* a_chartview)
+{
+    // check whether there two series for real and imaginary parts
+    if (a_chartview->chart()->series().size() != 2) {
+        return 1;
+    }
+    auto N = a_values.size();
+    QVector<double> real;
+    QVector<double> imag;
+    real.resize(N);
+    imag.resize(N);
+    for (int var = 0; var < N; ++var) {
+        real[var] = a_values[var].real();
+        imag[var] = a_values[var].imag();
+    }
+    static_cast<QLineSeries*>(a_chartview->chart()->series()[0])->replace(make_points(real));
+    static_cast<QLineSeries*>(a_chartview->chart()->series()[1])->replace(make_points(imag));
+    return 0;
 }
 
 void MainWindow::on_resetbtn_pressed()
