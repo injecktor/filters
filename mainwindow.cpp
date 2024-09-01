@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
         coefs[var] = sinc * sin(2 * PI * fs / 4. * (double)var / fs);
     }
     m_coefsls->replace(make_points(coefs));
-    auto coefsfr = ft::dft_m(ft::dft(coefs));
+    auto coefsfr = ft::dft_module(ft::dft(coefs));
     m_coefsfrls->replace(make_points(coefsfr));
     QVector<double> signal;
     signal.resize(N);
@@ -35,9 +35,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
     m_inputls->replace(make_points(signal));
     // m_testls->replace(make_points(signal2));
-    auto filtered_signal = ft::convolution(signal, coefs);
+    // auto filtered_signal = ft::convolution(signal, coefs);
     // m_outputls->replace(make_points(filtered_signal));
-    draw_complex(ft::dft(signal), m_outputcv);
+    m_outputls->replace(make_points(ft::real(ft::idft(ft::dft(signal)))));
+    // draw_complex(ft::dft(signal), m_outputcv);
 }
 
 MainWindow::~MainWindow()
@@ -89,7 +90,7 @@ QVector<QPointF> MainWindow::make_points(QVector<double> a_values)
 
 quint8 MainWindow::draw_complex(QVector<std::complex<double>> a_values, QChartView* a_chartview)
 {
-    // check whether there two series for real and imaginary parts
+    // check whether there are series for real and imaginary parts
     if (a_chartview->chart()->series().size() != 2) {
         return 1;
     }
