@@ -6,36 +6,28 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , fs(10000)
     , N(1000)
-    , m_coefs_count(50)
+    , m_coefs_count(129)
 {
     ui->setupUi(this);
     charts_init();
     series_init();
     charts_config();
-    QVector<double> coefs;
-    coefs.resize(m_coefs_count);
-    for (int var = 0; var < m_coefs_count; ++var) {
-        double shift = var - m_coefs_count / 2;
-        double sinc;
-        if (shift == 0) {
-            sinc = 1;
-        }
-        else {
-            sinc = sin(shift) / shift;
-        }
-        coefs[var] = sinc * sin(2 * PI * fs / 4. * (double)var / fs);
-    }
-    m_coefsls->replace(make_points(coefs));
+    QVector<double> coefs = ft::hilbert_coefs(m_coefs_count, 1);
+    draw(coefs, m_coefscv);
     auto coefsfr = ft::dft_module(ft::dft(coefs));
-    m_coefsfrls->replace(make_points(coefsfr));
+    draw(coefsfr, m_coefsfrcv);
     QVector<double> signal;
+    QVector<double> signal2;
     signal.resize(N);
+    signal2.resize(N);
     for (int var = 0; var < N; ++var) {
         signal[var] = sin(2 * PI * 1000 * (double)var / fs);
+        signal2[var] = sin(2 * PI * 1000 * (double)var / fs + PI / 2);
     }
     draw(signal, m_inputcv);
     auto filtered_signal = ft::convolution(signal, coefs);
     draw(filtered_signal, m_outputcv);
+    draw(signal2, m_outputcv, 1);
 }
 
 MainWindow::~MainWindow()
@@ -85,12 +77,12 @@ QVector<QPointF> MainWindow::make_points(QVector<double> a_values)
     return points;
 }
 
-quint8 MainWindow::draw(QVector<double> a_values, QChartView* a_chartview)
+quint8 MainWindow::draw(QVector<double> a_values, QChartView* a_chartview, int a_series_index)
 {
-    if (a_chartview->chart()->series().size() < 1) {
+    if (a_chartview->chart()->series().size() <= a_series_index) {
         return 1;
     }
-    static_cast<QLineSeries*>(a_chartview->chart()->series()[0])->replace(make_points(a_values));
+    static_cast<QLineSeries*>(a_chartview->chart()->series()[a_series_index])->replace(make_points(a_values));
     return 0;
 }
 
@@ -122,11 +114,11 @@ void MainWindow::on_resetbtn_pressed()
     m_outputcv->chart()->axes(Qt::Horizontal).back()->setRange(0, N);
     m_outputcv->chart()->axes(Qt::Vertical).back()->setRange(-2, 2);
 
-    m_coefscv->chart()->axes(Qt::Horizontal).back()->setRange(0, m_coefs_count);
+    m_coefscv->chart()->axes(Qt::Horizontal).back()->setRange(0, m_coefs_count - 1);
     m_coefscv->chart()->axes(Qt::Vertical).back()->setRange(-1, 2);
 
-    m_coefsfrcv->chart()->axes(Qt::Horizontal).back()->setRange(0, m_coefs_count);
-    m_coefsfrcv->chart()->axes(Qt::Vertical).back()->setRange(0, m_coefs_count / 20);
+    m_coefsfrcv->chart()->axes(Qt::Horizontal).back()->setRange(0, m_coefs_count - 1);
+    m_coefsfrcv->chart()->axes(Qt::Vertical).back()->setRange(0, 2);
 }
 
 void MainWindow::charts_init()

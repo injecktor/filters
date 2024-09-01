@@ -62,7 +62,7 @@ private:
     void charts_resize(QChartView* a_chartview);
     QVector<QPointF> make_points(QVector<double> a_values);
     // returns 0 if correct
-    quint8 draw(QVector<double> a_values, QChartView* a_chartview);
+    quint8 draw(QVector<double> a_values, QChartView* a_chartview, int a_series_index = 0);
     quint8 draw(QVector<std::complex<double>> a_values, QChartView* a_chartview);
     void series_init();
     void charts_init();
