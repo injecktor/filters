@@ -29,11 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
     auto coefsfr = ft::dft_m(ft::dft(coefs));
     m_coefsfrls->replace(make_points(coefsfr));
     QVector<double> signal;
+    QVector<double> signal2;
     signal.resize(N);
+    signal2.resize(N);
     for (int var = 0; var < N; ++var) {
         signal[var] = sin(2 * PI * 1000 * (double)var / fs);
+        signal2[var] = 2 * sin(2 * PI * 500 * (double)var / fs);;
     }
     m_inputls->replace(make_points(signal));
+    // m_testls->replace(make_points(signal2));
     auto filtered_signal = ft::convolution(signal, coefs);
     m_outputls->replace(make_points(filtered_signal));
 }
@@ -47,16 +51,20 @@ void MainWindow::showEvent(QShowEvent* /*event*/) {
     for (int var = 0; var < m_charts.size(); ++var) {
         charts_resize(m_charts[var]);
     }
-    ui->resetbtn->pressed();
+    emit ui->resetbtn->pressed();
 }
 
 void MainWindow::charts_config()
 {
-    Q_ASSERT(m_charts.size() == m_series.size());
+    m_inputcv->chart()->addSeries(m_inputls);
+    m_inputcv->chart()->addSeries(m_inputcls);
+    m_outputcv->chart()->addSeries(m_outputls);
+    m_outputcv->chart()->addSeries(m_outputcls);
+    m_coefscv->chart()->addSeries(m_coefsls);
+    m_coefsfrcv->chart()->addSeries(m_coefsfrls);
 
-    for (int var = 0; var < m_series.size(); ++var) {
+    for (int var = 0; var < m_charts.size(); ++var) {
         m_charts[var]->setRenderHint(QPainter::Antialiasing);
-        m_charts[var]->chart()->addSeries(m_series[var]);
         m_charts[var]->chart()->createDefaultAxes();
         m_charts[var]->chart()->zoomReset();
         m_charts[var]->chart()->legend()->hide();
@@ -111,14 +119,18 @@ void MainWindow::charts_init()
 void MainWindow::series_init()
 {
     m_inputls = new QLineSeries;
+    m_inputcls = new QLineSeries;
     m_outputls = new QLineSeries;
+    m_outputcls = new QLineSeries;
     m_coefsls = new QLineSeries;
     m_coefsfrls = new QLineSeries;
 
-    m_series.append(m_inputls);
-    m_series.append(m_outputls);
-    m_series.append(m_coefsls);
-    m_series.append(m_coefsfrls);
+    m_inputls->setColor(QColor(0, 0, 255));
+    m_inputcls->setColor(QColor(255, 0, 0));
+    m_outputls->setColor(QColor(0, 0, 255));
+    m_outputcls->setColor(QColor(255, 0, 0));
+    m_coefsls->setColor(QColor(0, 0, 255));
+    m_coefsfrls->setColor(QColor(0, 0, 255));
 }
 
 

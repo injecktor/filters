@@ -13,6 +13,19 @@ vectorc_t ft::dft(vector_t a_input)
     return result;
 }
 
+vectorc_t ft::idft(vectorc_t a_input)
+{
+    size_t N = a_input.size();
+    vectorc_t result;
+    result.resize(N);
+    for (size_t m = 0; m < N; ++m) {
+        for (size_t n = 0; n < N; ++n) {
+            result[m] += a_input[n] * exp(complex_t{0, -2 * PI * (double)n * (double)m / (double)N});
+        }
+    }
+    return result;
+}
+
 vector_t ft::dft_m(vectorc_t a_input)
 {
     size_t N = a_input.size();

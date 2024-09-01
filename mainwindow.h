@@ -6,6 +6,7 @@
 #include <QChart>
 #include <QChartView>
 #include <QPointF>
+#include <QColor>
 
 #include "dsp.h"
 
@@ -36,17 +37,18 @@ private:
     qint32 N;
     qint32 m_coefs_count;
 
-    // Chart's vectors
+    // Chart's vector
     QVector<QChartView*> m_charts;
-    QVector<QLineSeries*> m_series;
 
     // input
     QChartView* m_inputcv;
     QLineSeries* m_inputls;
+    QLineSeries* m_inputcls;
 
     // output
     QChartView* m_outputcv;
     QLineSeries* m_outputls;
+    QLineSeries* m_outputcls;
 
     // coefs
     QChartView* m_coefscv;
