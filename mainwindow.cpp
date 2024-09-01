@@ -33,12 +33,9 @@ MainWindow::MainWindow(QWidget *parent)
     for (int var = 0; var < N; ++var) {
         signal[var] = sin(2 * PI * 1000 * (double)var / fs);
     }
-    m_inputls->replace(make_points(signal));
-    // m_testls->replace(make_points(signal2));
-    // auto filtered_signal = ft::convolution(signal, coefs);
-    // m_outputls->replace(make_points(filtered_signal));
-    m_outputls->replace(make_points(ft::real(ft::idft(ft::dft(signal)))));
-    // draw_complex(ft::dft(signal), m_outputcv);
+    draw(signal, m_inputcv);
+    auto filtered_signal = ft::convolution(signal, coefs);
+    draw(filtered_signal, m_outputcv);
 }
 
 MainWindow::~MainWindow()
@@ -88,7 +85,16 @@ QVector<QPointF> MainWindow::make_points(QVector<double> a_values)
     return points;
 }
 
-quint8 MainWindow::draw_complex(QVector<std::complex<double>> a_values, QChartView* a_chartview)
+quint8 MainWindow::draw(QVector<double> a_values, QChartView* a_chartview)
+{
+    if (a_chartview->chart()->series().size() < 1) {
+        return 1;
+    }
+    static_cast<QLineSeries*>(a_chartview->chart()->series()[0])->replace(make_points(a_values));
+    return 0;
+}
+
+quint8 MainWindow::draw(QVector<std::complex<double>> a_values, QChartView* a_chartview)
 {
     // check whether there are series for real and imaginary parts
     if (a_chartview->chart()->series().size() != 2) {
